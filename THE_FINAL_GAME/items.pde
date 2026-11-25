@@ -1,100 +1,70 @@
 Sprite bottle_pink;
-boolean item2_1 = true; // true = item not picked up (item1_1 = level 1, item 1)
-boolean item4_1 = true;
-boolean item4_2 = true;
-boolean item3_1 = true;
-boolean item5_1 = true;
-boolean item5_2 = true;
 boolean drinkToggle = true;
 boolean inventory = false; //display the inventory?
 int diamond = 0;
 
+// One thing lying on the floor that you can pick up to heal
+class Item {
+  int room;
+  float x, y;
+  boolean isPokeball; // false = pink potion
+  int heal;
+  boolean taken = false;
+
+  Item(int room_, float x_, float y_, boolean isPokeball_) {
+    room = room_;
+    x = x_;
+    y = y_;
+    isPokeball = isPokeball_;
+    heal = isPokeball ? 20 : 10;
+  }
+}
+
+// room, x, y, Poke Ball?
+Item[] floorItems = {
+  new Item(2, 50, 100, false),
+  new Item(3, 50, 100, true),
+  new Item(4, 50, 100, false),
+  new Item(4, 100, 50, false),
+  new Item(5, 120, 140, true),
+  new Item(5, 100, 50, true)
+};
+
+void resetItems() {
+  for (Item it : floorItems) {
+    it.taken = false;
+  }
+}
+
 void items() {
-  //items no yet picked up
-  if (item2_1 == true && level == 2) { //true = appear on map
-    bottle_pink.setXY (50, 100);
-    bottle_pink.setFrameSequence(32, 32, 0);
-    bottle_pink.draw();
-  }
-  if (item4_1 == true && level == 4) { //true = appear on map
-    bottle_pink.setXY (50, 100);
-    bottle_pink.setFrameSequence(32, 32, 0);
-    bottle_pink.draw();
-  }
-  if (item4_2 == true && level == 4) { //true = appear on map
-    bottle_pink.setXY (100, 50);
-    bottle_pink.setFrameSequence(32, 32, 0);
-    bottle_pink.draw();
-  }
+  for (Item it : floorItems) {
+    if (it.taken || it.room != level) {
+      continue;
+    }
 
-  //the moment bottle is picked up
-  //items no yet picked up
-  if (item3_1 == true && level == 3) { //true = appear on map
-    pokeball.setXY (50, 100);
-    pokeball.setFrameSequence(32, 32, 0);
-    pokeball.draw();
-  }
+    // draw it on the floor
+    if (it.isPokeball) {
+      pokeball.setXY(it.x, it.y);
+      pokeball.setFrameSequence(0, 0, 0);
+      pokeball.setScale(0.5); // the ball I drew in 2019, shrunk down to item size
+      pokeball.draw();
+      pokeball.setScale(1);
+    } else {
+      bottle_pink.setXY(it.x, it.y);
+      bottle_pink.setFrameSequence(32, 32, 0);
+      bottle_pink.draw();
+    }
 
-  if (item5_1 == true && level == 5) { //true = appear on map
-    pokeball.setXY (50, 100);
-    pokeball.setFrameSequence(32, 32, 0);
-    pokeball.draw();
-  }
-  if (item5_2 == true && level == 5) { //true = appear on map
-    pokeball.setXY (100, 50);
-    pokeball.setFrameSequence(32, 32, 0);
-    pokeball.draw();
-  }
-
-    if (player.pp_collision(bottle_pink) && level == 2 && item2_1 == true) {
-    drinkToggle = true;
-    drink();
-    item2_1 = false; //bottle will go away
-    int addedHealth = 10;
-    playerHealthBar = constrain(playerHealthBar + addedHealth, 0, playerHealthBarOriginal);
-  }
-  
-    if (player.pp_collision(bottle_pink) && level == 4 && item4_1 == true) {
-    drinkToggle = true;
-    drink();
-    item4_1 = false; //bottle will go away
-    int addedHealth = 10;
-    playerHealthBar = constrain(playerHealthBar + addedHealth, 0, playerHealthBarOriginal);
-  }
-  
-   if (player.pp_collision(bottle_pink) && level == 4 && item4_2 == true) {
-    drinkToggle = true;
-    drink();
-    item4_2 = false; //bottle will go away
-    int addedHealth = 10;
-    playerHealthBar = constrain(playerHealthBar + addedHealth, 0, playerHealthBarOriginal);
-  }
-  
-  
-  
-  
-  if (player.pp_collision(pokeball) && level == 3 && item3_1 == true) {
-    drinkToggle = true;
-    drink();
-    item3_1 = false; //bottle will go away
-    int addedHealth = 20;
-    playerHealthBar = constrain(playerHealthBar + addedHealth, 0, playerHealthBarOriginal);
-  }
-  if (player.pp_collision(pokeball) && level == 5 && item5_1 == true) {
-    drinkToggle = true;
-    drink();
-    item5_1 = false; //bottle will go away
-    int addedHealth = 20;
-    playerHealthBar = constrain(playerHealthBar + addedHealth, 0, playerHealthBarOriginal);
-  }
-  if (player.pp_collision(pokeball) && level == 5 && item5_2 == true) {
-    drinkToggle = true;
-    drink();
-    item5_2 = false; //bottle will go away
-    int addedHealth = 20;
-    playerHealthBar = constrain(playerHealthBar + addedHealth, 0, playerHealthBarOriginal);
+    // walk over it to pick it up (only while you're alive!)
+    if (!isDead && !won && dist(pos_x, pos_y, it.x, it.y) < 18) {
+      it.taken = true; //item will go away
+      drinkToggle = true;
+      drink();
+      playerHealthBar = constrain(playerHealthBar + it.heal, 0, playerHealthBarOriginal);
+    }
   }
 }//items
+
 void drink() {
 
   if (drinkToggle == true) {

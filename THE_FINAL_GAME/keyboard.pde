@@ -5,9 +5,17 @@ void keyboard() {
 
   if (keyPressed) {
 
+    if (level == 0) { //start
+      if (key == 'y' || key == 'Y' || key == ENTER || key == RETURN) {
+        startGame();
+      }
+      return;
+    }
 
-    if (key == 'y') { //start
-      level = 1;
+    // no moving or attacking once the game is over
+    if (isDead || won) {
+      curKey = 9;
+      return;
     }
 
     if (key == CODED) {
@@ -29,7 +37,8 @@ void keyboard() {
       }
     } //CODED
 
-    if (keyCode == CONTROL) { // ATTACK!!!!!
+    // ATTACK!!!!! (Control, or Space since Control+arrows does other things on a Mac)
+    if (keyCode == CONTROL || key == ' ') {
       curKey = 4;
       if (swordToggle == true) {
         sword.play(); //sound
@@ -59,10 +68,16 @@ void keyboard() {
 
 void keyReleased() {
 
-  lastKey = curKey;
+  if (curKey != 9) {
+    lastKey = curKey;
+  }
   curKey = 9;
 
-  if (key == 'i') {
+  if ((key == 'i' || key == 'I') && level != 0 && !isDead && !won) {
     inventory = !inventory;
+  }
+
+  if ((key == 'r' || key == 'R') && (isDead || won)) {
+    resetGame();
   }
 }

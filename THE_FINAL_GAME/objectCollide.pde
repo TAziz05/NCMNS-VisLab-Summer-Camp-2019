@@ -1,44 +1,48 @@
-float lookE = 0;
-float lookW = 0;
-float lookN= 0;
-float lookS = 0;
+// WALLS
+// Each room has a wall map (see "walls" in the main tab).
+// A solid pixel in the wall map means you can't walk there.
+
+// Is there a wall at this spot in the current room?
+boolean wallAt(float x, float y) {
+  if (level < 1 || level > LAST_ROOM) {
+    return false;
+  }
+  PImage w = walls[level];
+  int ix = int(x);
+  int iy = int(y);
+  if (ix < 0 || iy < 0 || ix >= w.width || iy >= w.height) {
+    return false; // the edge of the window is handled in player()
+  }
+  int a = (w.pixels[iy * w.width + ix] >> 24) & 0xFF;
+  return a == 255;
+}
 
 void objectCollide() {
 
-  // INSPECT ALPHA (transparency) VALUSE IN ALL DIRECTIONS
-  // Objects you bump into will have an alpha value of 255, all else will be 0
-
+  // Look all around the player for walls.
   //Look East, starting at 10 pixels over and 20 pixels up,
-  //then look at ech pixel south of that for 35 pixels
-  //might need to adjust these nmbers for larger/smaller player sprites
+  //then look at each pixel south of that for 35 pixels
+  //might need to adjust these numbers for larger/smaller player sprites
 
   for (int i = 0; i < 35; i = i + 1) {
-    color Z = get(int(pos_x)+10, int(pos_y-20)+i);
-    lookE = alpha(Z);
-    if (lookE == 255) {
+    if (wallAt(pos_x + 10, pos_y - 20 + i)) {
       stopE = true;
     }
   }
 
   for (int i = 0; i < 35; i = i + 1) {
-    color Z = get(int(pos_x)-15, int(pos_y-20)+i);
-    lookW = alpha(Z);
-    if (lookW == 255) {
+    if (wallAt(pos_x - 15, pos_y - 20 + i)) {
       stopW = true;
     }
   }
   for (int i = 0; i < 15; i = i + 1) {
-    color Z = get((int(pos_x)-10)+i, int(pos_y-25));
-    lookN = alpha(Z);
-    if (lookN == 255) {
+    if (wallAt(pos_x - 10 + i, pos_y - 25)) {
       stopN = true;
     }
   }
 
   for (int i = 0; i < 15; i = i + 1) {
-    color Z = get((int(pos_x)-10)+i, int(pos_y+25));
-    lookS = alpha(Z);
-    if (lookS == 255) {
+    if (wallAt(pos_x - 10 + i, pos_y + 25)) {
       stopS = true;
     }
   }
